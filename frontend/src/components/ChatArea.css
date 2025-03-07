@@ -114,6 +114,23 @@
     color: #1677ff;
 }
 
+/* API错误显示样式 */
+.api-error {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #ff4d4f;
+    font-size: 13px;
+    background-color: rgba(255, 77, 79, 0.1);
+    padding: 4px 10px;
+    border-radius: 4px;
+    margin-left: auto;
+}
+
+.api-error svg {
+    flex-shrink: 0;
+}
+
 /* Messages Container */
 .messages-container {
     flex: 1;
@@ -189,6 +206,16 @@
 
 .message.assistant {
     background-color: #f7f7f8;
+}
+
+/* 错误消息样式 */
+.message.error {
+    background-color: rgba(255, 77, 79, 0.05);
+    border-left: 3px solid #ff4d4f;
+}
+
+.message.error .message-content {
+    color: #ff4d4f;
 }
 
 .message-content {
@@ -435,4 +462,17 @@ textarea:focus {
     .input-container {
         padding: 8px 12px 12px;
     }
+}
+/* 流式消息样式 */
+.message.assistant.streaming .message-content::after {
+    content: '▋';
+    display: inline-block;
+    vertical-align: middle;
+    animation: cursor-blink 1s step-start infinite;
+    margin-left: 2px;
+}
+
+@keyframes cursor-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
 }

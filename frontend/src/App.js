@@ -1,9 +1,12 @@
 // src/App.js
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './App.css';
 import Sidebar from './components/Sidebar';
 import ChatArea from './components/ChatArea';
 import { v4 as uuidv4 } from 'uuid';
+
+// API基础URL - 从环境变量获取，如果未定义则使用代理路径
+const API_BASE_URL = process.env.REACT_APP_API_URL || '';
 
 // 支持的模型列表
 const SUPPORTED_MODELS = [
@@ -12,7 +15,7 @@ const SUPPORTED_MODELS = [
         name: 'DeepSeek Chat',
         description: '通用大语言模型',
         avatar: '/models/deepseek-logo.png',
-        apiEndpoint: '/api/chat',
+        apiEndpoint: `${API_BASE_URL}/api/chat`,
         apiParams: {
             model: 'deepseek-chat',
             max_tokens: 2000,
@@ -24,7 +27,7 @@ const SUPPORTED_MODELS = [
         name: 'DeepSeek V3',
         description: '功能更强大的新版模型',
         avatar: '/models/deepseek-v3-logo.png',
-        apiEndpoint: '/api/chat',
+        apiEndpoint: `${API_BASE_URL}/api/chat`,
         apiParams: {
             model: 'deepseek-v3',
             max_tokens: 2000,
@@ -36,7 +39,7 @@ const SUPPORTED_MODELS = [
         name: 'DeepSeek R1',
         description: '专为代码设计的模型',
         avatar: '/models/deepseek-r1-logo.png',
-        apiEndpoint: '/api/chat',
+        apiEndpoint: `${API_BASE_URL}/api/chat`,
         apiParams: {
             model: 'deepseek-r1',
             max_tokens: 2000,
@@ -48,7 +51,7 @@ const SUPPORTED_MODELS = [
         name: '通义千问',
         description: '阿里通义大语言模型',
         avatar: '/models/tongyi-logo.png',
-        apiEndpoint: '/api/chat',
+        apiEndpoint: `${API_BASE_URL}/api/chat`,
         apiParams: {
             model: 'tongyi',
             max_tokens: 2000,
@@ -60,7 +63,7 @@ const SUPPORTED_MODELS = [
         name: '元宝',
         description: '适合中文对话的模型',
         avatar: '/models/yuanbao-logo.png',
-        apiEndpoint: '/api/chat',
+        apiEndpoint: `${API_BASE_URL}/api/chat`,
         apiParams: {
             model: 'yuanbao',
             max_tokens: 2000,
@@ -78,6 +81,24 @@ function App() {
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
     const [activeModel, setActiveModel] = useState(SUPPORTED_MODELS[0]);
     const [isNewChat, setIsNewChat] = useState(true);
+    const [apiError, setApiError] = useState(null);
+
+    // 使用useCallback包装createNewConversation避免依赖循环
+    const createNewConversation = useCallback(() => {
+        const newId = uuidv4();
+        const newConversation = {
+            id: newId,
+            title: '新对话',
+            messages: [],
+            createdAt: new Date().toISOString(),
+            modelId: activeModel.id
+        };
+
+        setConversations(prev => [...prev, newConversation]);
+        setActiveConversationId(newId);
+        setIsNewChat(true);
+        setIsMobileSidebarOpen(false);
+    }, [activeModel]);
 
     // 初始化时从本地存储加载对话数据
     useEffect(() => {
@@ -115,7 +136,29 @@ function App() {
                 setActiveModel(savedModel);
             }
         }
-    }, []);
+
+        // 检查API服务是否可用
+        checkApiHealth();
+    }, [createNewConversation]);
+
+    // 检查API健康状态
+    const checkApiHealth = async () => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/health`);
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('API健康检查失败:', response.status, errorText);
+                setApiError(`API服务不可用 (${response.status})`);
+            } else {
+                const data = await response.json();
+                console.log('API健康状态:', data);
+                setApiError(null);
+            }
+        } catch (error) {
+            console.error('API健康检查出错:', error);
+            setApiError(`无法连接到API服务: ${error.message}`);
+        }
+    };
 
     // 保存状态到本地存储
     useEffect(() => {
@@ -134,23 +177,6 @@ function App() {
 
     // 获取当前活跃对话
     const activeConversation = conversations.find(conv => conv.id === activeConversationId);
-
-    // 创建新对话
-    const createNewConversation = () => {
-        const newId = uuidv4();
-        const newConversation = {
-            id: newId,
-            title: '新对话',
-            messages: [],
-            createdAt: new Date().toISOString(),
-            modelId: activeModel.id
-        };
-
-        setConversations(prev => [...prev, newConversation]);
-        setActiveConversationId(newId);
-        setIsNewChat(true);
-        setIsMobileSidebarOpen(false);
-    };
 
     // 删除对话
     const deleteConversation = (id) => {
@@ -216,12 +242,39 @@ function App() {
         setIsNewChat(false);
     };
 
+    // 更新流式消息的辅助函数
+    const updateStreamingMessage = (conversationId, messageId, content, isError = false) => {
+        setConversations(prevConversations => {
+            return prevConversations.map(conv => {
+                if (conv.id === conversationId) {
+                    const updatedMessages = conv.messages.map(msg => {
+                        if (msg.id === messageId) {
+                            return {
+                                ...msg,
+                                content: content,
+                                isError: isError,
+                                isStreaming: false
+                            };
+                        }
+                        return msg;
+                    });
+
+                    return {
+                        ...conv,
+                        messages: updatedMessages
+                    };
+                }
+                return conv;
+            });
+        });
+    };
+
     // 切换模型
     const handleModelChange = (model) => {
         setActiveModel(model);
     };
 
-    // 处理发送消息
+    // 处理发送消息 - 流式响应实现
     const handleSendMessage = async (input) => {
         if (!input.trim() || !activeConversationId) return;
 
@@ -235,11 +288,24 @@ function App() {
         addMessageToConversation(activeConversationId, userMessage);
 
         setIsLoading(true);
+        setApiError(null);
+
+        // 创建空的助手消息用于流式填充
+        const assistantMessageId = uuidv4();
+        addMessageToConversation(activeConversationId, {
+            id: assistantMessageId,
+            role: 'assistant',
+            content: '',
+            timestamp: new Date().toISOString(),
+            modelId: activeModel.id,
+            isStreaming: true
+        });
+
         try {
             // 获取当前对话的所有消息用于API调用
             const currentConversation = conversations.find(conv => conv.id === activeConversationId);
             const currentMessages = [...(currentConversation.messages || []), userMessage]
-                .map(({ role, content }) => ({ role, content })); // 仅发送role和content字段
+                .map(({ role, content }) => ({ role, content }));
 
             // 构建API请求参数
             const requestBody = {
@@ -247,38 +313,60 @@ function App() {
                 ...activeModel.apiParams
             };
 
-            // 调用API
+            console.log('发送请求到:', activeModel.apiEndpoint);
+
+            // 使用标准fetch进行API调用
             const response = await fetch(activeModel.apiEndpoint, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Accept': 'application/json'
                 },
                 body: JSON.stringify(requestBody),
             });
 
-            const data = await response.json();
-
             if (!response.ok) {
-                throw new Error(data.error || '与AI服务通信时出错');
+                let errorText;
+                try {
+                    // 尝试获取JSON错误信息
+                    const errorData = await response.json();
+                    errorText = errorData.error || errorData.message || `API错误 (${response.status})`;
+                } catch (e) {
+                    // 如果不是JSON，获取文本错误信息
+                    errorText = await response.text();
+                    if (errorText.includes('<!DOCTYPE html>')) {
+                        errorText = `API返回了HTML页面而非JSON数据 (${response.status})`;
+                    }
+                }
+
+                console.error('API响应错误:', response.status, errorText);
+                throw new Error(errorText);
             }
 
+            const data = await response.json();
+            console.log('API响应数据类型:', typeof data);
+            console.log('API响应结构:', Object.keys(data));
+
             // 添加AI响应
-            addMessageToConversation(activeConversationId, {
-                role: 'assistant',
-                content: data.choices[0].message.content,
-                timestamp: new Date().toISOString(),
-                modelId: activeModel.id
-            });
+            updateStreamingMessage(
+                activeConversationId,
+                assistantMessageId,
+                data.choices[0].message.content,
+                false
+            );
         } catch (error) {
             console.error('发送消息时出错:', error);
+            console.error('错误详情:', error.stack);
 
-            // 添加错误消息
-            addMessageToConversation(activeConversationId, {
-                role: 'assistant',
-                content: `出错了: ${error.message}`,
-                timestamp: new Date().toISOString(),
-                modelId: activeModel.id
-            });
+            // 更新消息显示错误
+            updateStreamingMessage(
+                activeConversationId,
+                assistantMessageId,
+                `出错了: ${error.message}`,
+                true
+            );
+
+            setApiError(error.message);
         } finally {
             setIsLoading(false);
         }
@@ -310,6 +398,7 @@ function App() {
                 isSidebarOpen={isSidebarOpen}
                 setIsSidebarOpen={setIsSidebarOpen}
                 setIsMobileSidebarOpen={setIsMobileSidebarOpen}
+                apiError={apiError}
             />
         </div>
     );
