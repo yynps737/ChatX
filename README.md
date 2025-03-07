@@ -1,6 +1,6 @@
 # DeepSeek AI Chat 应用
 
-![DeepSeek AI](https://your-image-url-here.com/deepseek-logo.png)
+![DeepSeek AI]([https://baidu.com](https://www.deepseek.com/))
 
 一个基于多种大语言模型的智能对话应用，支持 DeepSeek-V3、DeepSeek-R1、通义千问、元宝等多模型，提供丰富的对话管理功能。
 
@@ -100,7 +100,7 @@ deepseek-chat/
 
 ## 📄 许可证
 
-[MIT 许可证](LICENSE)
+许可证暂无
 
 ## 🤝 贡献指南
 
