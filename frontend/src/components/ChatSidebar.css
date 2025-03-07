@@ -1,15 +1,16 @@
 /* src/components/ChatSidebar.css */
-/* 侧边栏样式 */
+/* 侧边栏样式 - 根据 DeepSeek 官方网站风格优化 */
 
 .chat-sidebar {
     width: 280px; /* 固定宽度 */
-    background-color: #1e293b; /* 深色背景 */
-    color: white;
+    background-color: #f0f4fc; /* DeepSeek 侧边栏背景色 */
+    color: #333;
     display: flex;
     flex-direction: column;
     height: 100%;
     z-index: 50; /* 确保在移动端视图中覆盖其他元素 */
-    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1); /* 右侧阴影 */
+    box-shadow: 1px 0 5px rgba(0, 0, 0, 0.05); /* 右侧阴影 */
+    border-right: 1px solid #e5e9f2;
 }
 
 .sidebar-header {
@@ -17,34 +18,35 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* 半透明边框 */
+    border-bottom: 1px solid #e5e9f2; /* 淡色边框 */
 }
 
 .sidebar-header h2 {
     margin: 0;
-    font-size: 1.25rem;
+    font-size: 1.125rem;
     font-weight: 600;
+    color: #3576f7; /* DeepSeek 蓝 */
 }
 
 /* 侧边栏关闭按钮（移动端使用） */
 .sidebar-close-button {
     display: none; /* 默认隐藏，移动端下显示 */
     background: transparent;
-    color: rgba(255, 255, 255, 0.7);
+    color: #64748b;
     border-radius: 0.375rem;
     padding: 0.375rem;
 }
 
 .sidebar-close-button:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
+    background: rgba(100, 116, 139, 0.1);
+    color: #3576f7;
 }
 
 /* 新对话按钮 */
 .new-chat-button {
     margin: 1rem;
     padding: 0.75rem 1rem;
-    background: linear-gradient(135deg, #60a5fa, #3b82f6); /* 渐变蓝色背景 */
+    background: #3576f7; /* DeepSeek 蓝 */
     color: white;
     border-radius: 0.5rem;
     display: flex;
@@ -52,12 +54,13 @@
     justify-content: center;
     font-weight: 500;
     transition: all 0.2s;
-    box-shadow: 0 2px 10px rgba(59, 130, 246, 0.3); /* 蓝色阴影 */
+    box-shadow: 0 2px 5px rgba(53, 118, 247, 0.2); /* 蓝色阴影 */
 }
 
 .new-chat-button:hover {
-    transform: translateY(-2px); /* 悬停时上移效果 */
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    background: #215ae5; /* 深蓝色 */
+    transform: translateY(-1px); /* 悬停时上移效果 */
+    box-shadow: 0 3px 8px rgba(53, 118, 247, 0.3);
 }
 
 .new-chat-button svg {
@@ -80,6 +83,7 @@
     height: 100%;
     opacity: 0.7;
     text-align: center;
+    color: #64748b;
 }
 
 .no-conversations p {
@@ -97,16 +101,18 @@
     cursor: pointer;
     transition: all 0.2s;
     justify-content: space-between;
+    color: #475569;
 }
 
 .conversation-item:hover {
-    background-color: rgba(255, 255, 255, 0.1); /* 悬停背景 */
+    background-color: #e9effb; /* 浅蓝背景 */
 }
 
 /* 活跃对话样式 */
 .conversation-item.active {
-    background: linear-gradient(90deg, rgba(59, 130, 246, 0.2), rgba(52, 211, 153, 0.05)); /* 渐变高亮 */
-    border-left: 3px solid #3b82f6; /* 左侧蓝色边框标记 */
+    background: #e5edff; /* DeepSeek 高亮蓝 */
+    border-left: 3px solid #3576f7; /* 左侧蓝色边框标记 */
+    color: #215ae5;
 }
 
 /* 对话内容容器 */
@@ -127,23 +133,23 @@
 /* 对话日期 */
 .conversation-date {
     font-size: 0.75rem;
-    color: rgba(255, 255, 255, 0.5); /* 半透明颜色 */
+    color: #94a3b8; /* 浅灰色 */
 }
 
 /* 编辑对话标题的输入框 */
 .conversation-content input {
     width: 100%;
     padding: 0.375rem 0.5rem;
-    background-color: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background-color: white;
+    border: 1px solid #e5e9f2;
     border-radius: 0.25rem;
-    color: white;
+    color: #333;
     font-size: 0.875rem;
 }
 
 .conversation-content input:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+    border-color: #3576f7;
+    box-shadow: 0 0 0 2px rgba(53, 118, 247, 0.2);
 }
 
 /* 对话操作按钮容器 */
@@ -162,7 +168,7 @@
 .edit-button,
 .delete-button {
     background: none;
-    color: rgba(255, 255, 255, 0.7);
+    color: #64748b;
     padding: 0.375rem;
     margin-left: 0.25rem;
     border-radius: 0.25rem;
@@ -170,23 +176,23 @@
 }
 
 .edit-button:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: white;
+    background-color: rgba(53, 118, 247, 0.1);
+    color: #3576f7;
 }
 
 .delete-button:hover {
-    background-color: rgba(239, 68, 68, 0.2); /* 红色背景 */
+    background-color: rgba(239, 68, 68, 0.1); /* 红色背景 */
     color: #ef4444; /* 红色文字 */
 }
 
 /* 侧边栏页脚 */
 .sidebar-footer {
     padding: 1rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid #e5e9f2;
     display: flex;
     justify-content: center;
     font-size: 0.75rem;
-    color: rgba(255, 255, 255, 0.5);
+    color: #94a3b8;
 }
 
 /* 响应式布局 - 移动端适配 */
@@ -198,6 +204,7 @@
         height: 100%;
         transform: translateX(-100%); /* 默认隐藏在屏幕左侧 */
         transition: transform 0.3s ease;
+        background-color: #f0f4fc;
     }
 
     /* 打开状态 */

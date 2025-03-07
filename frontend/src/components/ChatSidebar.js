@@ -5,14 +5,15 @@ import React, { useState, useEffect, useRef } from 'react';
 import './ChatSidebar.css';
 
 function ChatSidebar({
-                         conversations,       // 所有对话数组
-                         activeConversationId, // 当前活跃对话ID
-                         onSelectConversation, // 选择对话的回调函数
-                         onCreateConversation, // 创建新对话的回调函数
-                         onDeleteConversation, // 删除对话的回调函数
-                         onRenameConversation, // 重命名对话的回调函数
-                         isOpen,              // 移动端视图下侧边栏是否打开
-                         onClose              // 关闭侧边栏的回调函数
+                         conversations,
+                         activeConversationId,
+                         onSelectConversation,
+                         onCreateConversation,
+                         onDeleteConversation,
+                         onRenameConversation,
+                         isOpen,
+                         onClose,
+                         modelsInfo
                      }) {
     const [editingId, setEditingId] = useState(null); // 当前正在编辑的对话ID
     const [editTitle, setEditTitle] = useState('');   // 编辑中的标题内容
@@ -60,6 +61,19 @@ function ChatSidebar({
         });
     };
 
+    // 获取对话使用的模型信息
+    const getModelInfo = (conversation) => {
+        // 使用对话中最后一条消息的模型ID，如果没有则使用对话的modelId
+        const lastMessage = conversation.messages[conversation.messages.length - 1];
+        const modelId = lastMessage?.modelId || conversation.modelId;
+
+        if (modelId) {
+            return modelsInfo.find(model => model.id === modelId) || modelsInfo[0];
+        }
+
+        return modelsInfo[0]; // 默认使用第一个模型
+    };
+
     return (
         <div className={`chat-sidebar ${isOpen ? 'open' : ''}`}>
             <div className="sidebar-header">
@@ -94,65 +108,80 @@ function ChatSidebar({
                         <p>点击"新对话"开始聊天</p>
                     </div>
                 ) : (
-                    conversations.map(conversation => (
-                        <div
-                            key={conversation.id}
-                            className={`conversation-item ${conversation.id === activeConversationId ? 'active' : ''}`}
-                            onClick={() => {
-                                onSelectConversation(conversation.id);
-                                onClose(); // 选择对话后关闭侧边栏（在移动端有效）
-                            }}
-                        >
-                            <div className="conversation-content">
-                                {editingId === conversation.id ? (
-                                    // 编辑模式
-                                    <input
-                                        ref={editInputRef}
-                                        type="text"
-                                        value={editTitle}
-                                        onChange={(e) => setEditTitle(e.target.value)}
-                                        onBlur={() => handleSaveEdit(conversation.id)}
-                                        onKeyPress={(e) => e.key === 'Enter' && handleSaveEdit(conversation.id)}
-                                        onClick={(e) => e.stopPropagation()}
-                                    />
-                                ) : (
-                                    // 显示模式
-                                    <>
-                                        <div className="conversation-title" title={conversation.title}>
-                                            {conversation.title || '新对话'}
-                                        </div>
-                                        <div className="conversation-date">
-                                            {formatDate(conversation.createdAt)}
-                                        </div>
-                                    </>
-                                )}
-                            </div>
+                    conversations.map(conversation => {
+                        const modelInfo = getModelInfo(conversation);
 
-                            {/* 对话操作按钮 */}
-                            <div className="conversation-actions">
-                                <button
-                                    className="edit-button"
-                                    onClick={(e) => handleEdit(e, conversation.id, conversation.title)}
-                                    title="重命名对话"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                    </svg>
-                                </button>
-                                <button
-                                    className="delete-button"
-                                    onClick={(e) => handleDelete(e, conversation.id)}
-                                    title="删除对话"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <path d="M3 6h18"></path>
-                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                    </svg>
-                                </button>
+                        return (
+                            <div
+                                key={conversation.id}
+                                className={`conversation-item ${conversation.id === activeConversationId ? 'active' : ''}`}
+                                onClick={() => {
+                                    onSelectConversation(conversation.id);
+                                    onClose(); // 选择对话后关闭侧边栏（在移动端有效）
+                                }}
+                            >
+                                <div className="conversation-content">
+                                    {editingId === conversation.id ? (
+                                        // 编辑模式
+                                        <input
+                                            ref={editInputRef}
+                                            type="text"
+                                            value={editTitle}
+                                            onChange={(e) => setEditTitle(e.target.value)}
+                                            onBlur={() => handleSaveEdit(conversation.id)}
+                                            onKeyPress={(e) => e.key === 'Enter' && handleSaveEdit(conversation.id)}
+                                            onClick={(e) => e.stopPropagation()}
+                                        />
+                                    ) : (
+                                        // 显示模式
+                                        <>
+                                            <div className="conversation-title" title={conversation.title}>
+                                                <img
+                                                    src={modelInfo.avatar}
+                                                    alt={modelInfo.name}
+                                                    style={{
+                                                        width: '14px',
+                                                        height: '14px',
+                                                        marginRight: '6px',
+                                                        verticalAlign: 'middle',
+                                                        borderRadius: '50%'
+                                                    }}
+                                                />
+                                                {conversation.title || '新对话'}
+                                            </div>
+                                            <div className="conversation-date">
+                                                {formatDate(conversation.createdAt)}
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+
+                                {/* 对话操作按钮 */}
+                                <div className="conversation-actions">
+                                    <button
+                                        className="edit-button"
+                                        onClick={(e) => handleEdit(e, conversation.id, conversation.title)}
+                                        title="重命名对话"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                        </svg>
+                                    </button>
+                                    <button
+                                        className="delete-button"
+                                        onClick={(e) => handleDelete(e, conversation.id)}
+                                        title="删除对话"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M3 6h18"></path>
+                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                        </svg>
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                    ))
+                        );
+                    })
                 )}
             </div>
 
