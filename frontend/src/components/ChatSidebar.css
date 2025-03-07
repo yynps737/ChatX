@@ -1,0 +1,212 @@
+/* src/components/ChatSidebar.css */
+/* 侧边栏样式 */
+
+.chat-sidebar {
+    width: 280px; /* 固定宽度 */
+    background-color: #1e293b; /* 深色背景 */
+    color: white;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    z-index: 50; /* 确保在移动端视图中覆盖其他元素 */
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1); /* 右侧阴影 */
+}
+
+.sidebar-header {
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* 半透明边框 */
+}
+
+.sidebar-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+/* 侧边栏关闭按钮（移动端使用） */
+.sidebar-close-button {
+    display: none; /* 默认隐藏，移动端下显示 */
+    background: transparent;
+    color: rgba(255, 255, 255, 0.7);
+    border-radius: 0.375rem;
+    padding: 0.375rem;
+}
+
+.sidebar-close-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+/* 新对话按钮 */
+.new-chat-button {
+    margin: 1rem;
+    padding: 0.75rem 1rem;
+    background: linear-gradient(135deg, #60a5fa, #3b82f6); /* 渐变蓝色背景 */
+    color: white;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+    transition: all 0.2s;
+    box-shadow: 0 2px 10px rgba(59, 130, 246, 0.3); /* 蓝色阴影 */
+}
+
+.new-chat-button:hover {
+    transform: translateY(-2px); /* 悬停时上移效果 */
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.new-chat-button svg {
+    margin-right: 0.5rem;
+}
+
+/* 对话列表容器 */
+.conversations-list {
+    flex: 1;
+    overflow-y: auto; /* 内容过多时可滚动 */
+    padding: 0.5rem;
+}
+
+/* 无对话时的提示 */
+.no-conversations {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    opacity: 0.7;
+    text-align: center;
+}
+
+.no-conversations p {
+    margin: 0.5rem 0;
+    font-size: 0.875rem;
+}
+
+/* 单个对话项样式 */
+.conversation-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    margin-bottom: 0.25rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    justify-content: space-between;
+}
+
+.conversation-item:hover {
+    background-color: rgba(255, 255, 255, 0.1); /* 悬停背景 */
+}
+
+/* 活跃对话样式 */
+.conversation-item.active {
+    background: linear-gradient(90deg, rgba(59, 130, 246, 0.2), rgba(52, 211, 153, 0.05)); /* 渐变高亮 */
+    border-left: 3px solid #3b82f6; /* 左侧蓝色边框标记 */
+}
+
+/* 对话内容容器 */
+.conversation-content {
+    flex: 1;
+    min-width: 0; /* 允许内容压缩 */
+}
+
+/* 对话标题 */
+.conversation-title {
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* 超出部分显示省略号 */
+}
+
+/* 对话日期 */
+.conversation-date {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.5); /* 半透明颜色 */
+}
+
+/* 编辑对话标题的输入框 */
+.conversation-content input {
+    width: 100%;
+    padding: 0.375rem 0.5rem;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0.25rem;
+    color: white;
+    font-size: 0.875rem;
+}
+
+.conversation-content input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+}
+
+/* 对话操作按钮容器 */
+.conversation-actions {
+    display: flex;
+    opacity: 0; /* 默认隐藏 */
+    transition: opacity 0.2s;
+}
+
+/* 鼠标悬停时显示操作按钮 */
+.conversation-item:hover .conversation-actions {
+    opacity: 1;
+}
+
+/* 编辑和删除按钮样式 */
+.edit-button,
+.delete-button {
+    background: none;
+    color: rgba(255, 255, 255, 0.7);
+    padding: 0.375rem;
+    margin-left: 0.25rem;
+    border-radius: 0.25rem;
+    transition: all 0.2s;
+}
+
+.edit-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.delete-button:hover {
+    background-color: rgba(239, 68, 68, 0.2); /* 红色背景 */
+    color: #ef4444; /* 红色文字 */
+}
+
+/* 侧边栏页脚 */
+.sidebar-footer {
+    padding: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: center;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* 响应式布局 - 移动端适配 */
+@media (max-width: 768px) {
+    .chat-sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100%;
+        transform: translateX(-100%); /* 默认隐藏在屏幕左侧 */
+        transition: transform 0.3s ease;
+    }
+
+    /* 打开状态 */
+    .chat-sidebar.open {
+        transform: translateX(0);
+    }
+
+    /* 在移动端显示关闭按钮 */
+    .sidebar-close-button {
+        display: block;
+    }
+}
