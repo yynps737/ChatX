@@ -110,5 +110,5 @@ deepseek-chat/
 
 如有问题或建议，请通过以下方式联系我们：
 
-- 邮箱：your-email@example.com
-- GitHub Issues：[提交问题](https://github.com/yourusername/deepseek-chat/issues)
+- 邮箱：ysa@kiki20.com
+- GitHub Issues：[提交问题](https://github.com/yynps737/deepseek-chat/issues)
